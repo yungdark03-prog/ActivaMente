@@ -1,0 +1,14 @@
+{
+  "name": "activamente",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Proyecto completo ActivaMente (Frontend + Backend)",
+  "scripts": {
+    "dev": "node -e \"const { spawn } = require('child_process'); ['activamente-backend', 'activamente-frontend'].forEach(dir => spawn('npm', ['--prefix', dir, 'run', 'dev'], { stdio: 'inherit', shell: true }));\"",
+    "start": "npm run dev",
+    "backend": "npm --prefix activamente-backend run dev",
+    "frontend": "npm --prefix activamente-frontend run dev",
+    "build": "npm --prefix activamente-frontend run build"
+  }
+}
+
