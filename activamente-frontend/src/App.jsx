@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Registro from './Registro';
+import VerificarEmail from './VerificarEmail';
+import RestablecerPassword from './RestablecerPassword';
 import Layout from './Layout';
 import Inicio from './Inicio';
 import Rutina from './Rutina';
@@ -13,6 +15,8 @@ function App() {
         {/* Rutas Públicas (Pantalla completa) */}
         <Route path="/" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/verificar-email" element={<VerificarEmail />} />
+        <Route path="/restablecer-password" element={<RestablecerPassword />} />
         
         {/* Rutas Privadas (Con barra lateral) */}
         <Route path="/app" element={<Layout />}>

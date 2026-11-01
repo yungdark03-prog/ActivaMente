@@ -11,6 +11,7 @@ export default function Registro() {
     ocupacion: 'estudiante'
   });
   const [error, setError] = useState('');
+  const [cargando, setCargando] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,12 +19,30 @@ export default function Registro() {
 
   const handleRegistro = async (e) => {
     e.preventDefault();
+    setError('');
+
+    const correoLimpio = (formData.email || '').trim().toLowerCase();
+    const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!regexCorreo.test(correoLimpio)) {
+      setError('Por favor ingresa una dirección de correo electrónico real y válida.');
+      return;
+    }
+
+    setCargando(true);
     try {
       const response = await api.post('/auth/registro', formData);
       localStorage.setItem('token', response.data.token);
+      if (response.data.verificacion) {
+        sessionStorage.setItem(
+          'avisoRegistroVerificacion',
+          JSON.stringify(response.data.verificacion)
+        );
+      }
       navigate('/app/inicio');
     } catch (err) {
       setError(err.response?.data?.error || 'Error al registrar usuario');
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -73,9 +92,12 @@ export default function Registro() {
                   className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] focus:border-transparent outline-none transition-all text-sm" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Correo Electrónico</label>
-                <input name="email" type="email" onChange={handleChange} placeholder="ana@correo.com" required
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Correo Electrónico Real</label>
+                <input name="email" type="email" onChange={handleChange} placeholder="tu.correo@gmail.com" required
                   className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] focus:border-transparent outline-none transition-all text-sm" />
+                <p className="text-xs text-gray-400 mt-1.5">
+                  📩 Te enviaremos un correo de confirmación. Podrás entrar de inmediato, pero debes verificarlo en un plazo de 7 días para conservar tu cuenta.
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Contraseña</label>
@@ -95,9 +117,9 @@ export default function Registro() {
             
             {error && <p className="text-red-500 text-sm font-medium mt-2">❌ {error}</p>}
             
-            <button type="submit" 
-              className="mt-6 w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold py-3.5 rounded-2xl shadow-md transition-all hover:shadow-lg cursor-pointer">
-              Registrarme ahora
+            <button type="submit" disabled={cargando}
+              className="mt-6 w-full bg-[#0F172A] hover:bg-[#1E293B] disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl shadow-md transition-all hover:shadow-lg cursor-pointer">
+              {cargando ? 'Verificando correo y creando cuenta...' : 'Registrarme ahora'}
             </button>
           </form>
 

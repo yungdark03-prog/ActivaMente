@@ -20,11 +20,36 @@ export default function Rutina() {
   const [timerActivo, setTimerActivo] = useState(false);
   const [rutinaFinalizada, setRutinaFinalizada] = useState(false);
   const [actividadActualIndex, setActividadActualIndex] = useState(0);
+  const [sonidoHabilitado, setSonidoHabilitado] = useState(true);
+
+  const reproducirSonidoCampana = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      [523.25, 659.25, 783.99].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.18);
+        gain.gain.setValueAtTime(0.22, ctx.currentTime + idx * 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.18 + 0.6);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.18);
+        osc.stop(ctx.currentTime + idx * 0.18 + 0.6);
+      });
+    } catch (e) {
+      // Ignorar si el navegador bloquea audio automático
+    }
+  };
 
   useEffect(() => {
     api.get('/usuarios/perfil').then(res => {
       if (res.data?.ubicacionPorDefecto) setUbicacion(res.data.ubicacionPorDefecto);
       if (res.data?.tiempoPorDefecto) setTiempo(String(res.data.tiempoPorDefecto));
+      if (res.data?.objetivoPorDefecto) setObjetivo(res.data.objetivoPorDefecto);
+      if (res.data?.sonidoTemporizador !== undefined) setSonidoHabilitado(Boolean(res.data.sonidoTemporizador));
     }).catch(() => {});
   }, []);
 
@@ -47,12 +72,15 @@ export default function Rutina() {
     } else if (tiempoRestante === 0 && timerActivo) {
       setTimerActivo(false);
       setRutinaFinalizada(true);
+      if (sonidoHabilitado) {
+        reproducirSonidoCampana();
+      }
       if (rutina?.sesionId) {
         marcarSesionCompletada(rutina.sesionId);
       }
     }
     return () => clearInterval(intervalo);
-  }, [timerActivo, tiempoRestante, rutina]);
+  }, [timerActivo, tiempoRestante, rutina, sonidoHabilitado]);
 
   const formatoTiempo = (segundos) => {
     const min = Math.floor(segundos / 60).toString().padStart(2, '0');

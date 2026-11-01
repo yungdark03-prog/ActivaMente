@@ -1,11 +1,25 @@
-require('dotenv').config();
+const path = require('path');
+const { encriptarArchivoEnv } = require('./src/config/secrets');
+
+// Encriptar automáticamente cualquier API Key en texto plano dentro de .env antes de cargarlo
+try {
+  const varsCifradas = encriptarArchivoEnv(path.join(__dirname, '.env'));
+  if (varsCifradas.length > 0) {
+    console.log(`🔒 Variables encriptadas automáticamente con AES-256-GCM en .env: ${varsCifradas.join(', ')}`);
+  }
+} catch (e) {
+  // Ignorar si .env no existe aún
+}
+
+require('dotenv').config({ override: true });
 const express = require('express');
 const cors = require('cors');
 
-// 1. IMPORTAR RUTAS
+// 1. IMPORTAR RUTAS Y SERVICIOS
 const authRoutes = require('./src/routes/authRoutes');
 const rutinasRoutes = require('./src/routes/rutinasRoutes');
 const usuariosRoutes = require('./src/routes/usuariosRoutes');
+const { limpiarCuentasNoVerificadasExpiradas } = require('./src/services/emailService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,4 +54,7 @@ app.get('/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor ActivaMente corriendo en http://localhost:${PORT}`);
+  // Limpiar cuentas no verificadas con más de 1 semana al iniciar y cada hora
+  limpiarCuentasNoVerificadasExpiradas();
+  setInterval(limpiarCuentasNoVerificadasExpiradas, 60 * 60 * 1000);
 });

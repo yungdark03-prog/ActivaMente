@@ -138,6 +138,43 @@ export default function Inicio() {
         </div>
       </div>
 
+      {/* META DIARIA DE BIENESTAR */}
+      {(() => {
+        const metaMin = progreso.usuario?.metaDiariaMin || 20;
+        const porcentajeMeta = Math.min(100, Math.round(((progreso.minutosHoy || 0) / metaMin) * 100));
+        return (
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎯</span>
+                <div>
+                  <h2 className="text-base font-extrabold text-[#0F172A]">
+                    Meta Diaria de Bienestar ({metaMin} min)
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {porcentajeMeta >= 100
+                      ? '¡Felicidades! Ya cumpliste tu meta diaria configurada en Ajustes.'
+                      : `Llevas ${progreso.minutosHoy || 0} de ${metaMin} minutos hoy (${porcentajeMeta}%).`}
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/app/ajustes"
+                className="text-xs font-bold text-[#0284C7] hover:underline self-start sm:self-auto"
+              >
+                Cambiar meta en Ajustes →
+              </Link>
+            </div>
+            <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#0284C7] to-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${porcentajeMeta}%` }}
+              />
+            </div>
+          </div>
+        );
+      })()}
+
       {/* BANNER DE ACCIÓN */}
       <div className="bg-gradient-to-r from-[#1E1B29] to-[#0284C7] rounded-3xl p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-6">
         <div>

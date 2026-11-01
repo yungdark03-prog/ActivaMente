@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Soporte global para Modo Oscuro en ActivaMente */
+html.tema-oscuro body,
+html.tema-oscuro .bg-\[\#F8FAFC\] {
+  background-color: #0F172A !important;
+  color: #F1F5F9 !important;
+}
+
+html.tema-oscuro .bg-white {
+  background-color: #1E293B !important;
+  color: #F1F5F9 !important;
+}
+
+html.tema-oscuro .text-\[\#0F172A\],
+html.tema-oscuro .text-gray-800,
+html.tema-oscuro .text-gray-700 {
+  color: #F8FAFC !important;
+}
+
+html.tema-oscuro .text-gray-600,
+html.tema-oscuro .text-gray-500 {
+  color: #94A3B8 !important;
+}
+
+html.tema-oscuro .border-gray-100,
+html.tema-oscuro .border-gray-200 {
+  border-color: #334155 !important;
+}
+
+html.tema-oscuro input:not([type="checkbox"]),
+html.tema-oscuro select {
+  background-color: #0F172A !important;
+  color: #F8FAFC !important;
+  border-color: #334155 !important;
+}

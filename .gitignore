@@ -1,0 +1,15 @@
+# Variables de entorno y llaves de encriptación (NUNCA subir a GitHub)
+.env
+.env.*
+!.env.example
+**/*.env
+**/*.env.*
+!**/.env.example
+*.key
+
+# Dependencias y compilados
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+

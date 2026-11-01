@@ -8,7 +8,9 @@
     "start": "npm run dev",
     "backend": "npm --prefix activamente-backend run dev",
     "frontend": "npm --prefix activamente-frontend run dev",
-    "build": "npm --prefix activamente-frontend run build"
+    "build": "npm --prefix activamente-frontend run build",
+    "encriptar-env": "node -e \"const path = require('path'); const { encriptarArchivoEnv, RUTA_LLAVE_MAESTRA } = require('./activamente-backend/src/config/secrets'); const cifradas = encriptarArchivoEnv(path.resolve('./activamente-backend/.env')); console.log(cifradas.length ? '🔒 Variables encriptadas con AES-256-GCM: ' + cifradas.join(', ') : '✅ Todas las API Keys en .env ya están encriptadas.'); console.log('🔑 Llave maestra resguardada en:', RUTA_LLAVE_MAESTRA);\"",
+    "verificar-brevo": "node -e \"require('./activamente-backend/node_modules/dotenv').config({ path: './activamente-backend/.env' }); const { obtenerSecreto } = require('./activamente-backend/src/config/secrets'); const k = obtenerSecreto('BREVO_API_KEY'); if (!k) { console.log('❌ Aún no has pegado tu BREVO_API_KEY en activamente-backend/.env'); process.exit(1); } fetch('https://api.brevo.com/v3/account', { headers: { 'api-key': k, accept: 'application/json' } }).then(async r => { const d = await r.json(); if (!r.ok) { console.log('❌ Llave inválida:', d); } else { console.log('✅ ¡Conectado a Brevo con éxito (usando API Key desencriptada en memoria)! Remitente verificado:', d.email); } });\""
   }
 }
 

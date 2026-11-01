@@ -1,5 +1,6 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const { obtenerSecreto } = require('../config/secrets');
 
 const verificarToken = (req, res, next) => {
   const token = req.header('Authorization');
@@ -10,10 +11,11 @@ const verificarToken = (req, res, next) => {
 
   try {
     const tokenLimpio = token.replace('Bearer ', '').trim();
-    if (!process.env.JWT_SECRET) {
+    const jwtSecret = obtenerSecreto('JWT_SECRET');
+    if (!jwtSecret) {
       console.error('⚠️ ALERTA DE SEGURIDAD: JWT_SECRET no está definido en el archivo .env');
     }
-    const verificado = jwt.verify(tokenLimpio, process.env.JWT_SECRET || 'secreto_temporal');
+    const verificado = jwt.verify(tokenLimpio, jwtSecret || 'secreto_temporal');
 
     req.usuario = verificado;
     next();

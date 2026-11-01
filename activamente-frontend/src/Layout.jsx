@@ -8,20 +8,63 @@ export default function Layout() {
   const [avatarUrl, setAvatarUrl] = useState(
     localStorage.getItem('fotoPerfil') || 'https://api.dicebear.com/7.x/notionists/svg?seed=Ramses'
   );
+  const [perfilVerificacion, setPerfilVerificacion] = useState({
+    cargado: false,
+    emailVerificado: true,
+    diasRestantes: 7,
+    email: '',
+    frecuenciaRecordatorioMin: 0
+  });
 
   useEffect(() => {
-    const actualizarAvatar = () => {
+    const temaGuardado = localStorage.getItem('temaOscuro') === 'true';
+    document.documentElement.classList.toggle('tema-oscuro', temaGuardado);
+
+    const cargarEstadoPerfil = () => {
       setAvatarUrl(localStorage.getItem('fotoPerfil') || 'https://api.dicebear.com/7.x/notionists/svg?seed=Ramses');
+      api.get('/usuarios/perfil').then((res) => {
+        if (res.data?.fotoPerfil) {
+          localStorage.setItem('fotoPerfil', res.data.fotoPerfil);
+          setAvatarUrl(res.data.fotoPerfil);
+        }
+        const esOscuro = Boolean(res.data?.temaOscuro);
+        localStorage.setItem('temaOscuro', String(esOscuro));
+        document.documentElement.classList.toggle('tema-oscuro', esOscuro);
+
+        setPerfilVerificacion({
+          cargado: true,
+          emailVerificado: Boolean(res.data?.emailVerificado),
+          diasRestantes: res.data?.diasRestantesVerificacion ?? 7,
+          email: res.data?.email || '',
+          frecuenciaRecordatorioMin: Number(res.data?.frecuenciaRecordatorioMin || 0)
+        });
+      }).catch((err) => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/');
+        }
+      });
     };
-    window.addEventListener('perfilActualizado', actualizarAvatar);
-    api.get('/usuarios/perfil').then((res) => {
-      if (res.data?.fotoPerfil) {
-        localStorage.setItem('fotoPerfil', res.data.fotoPerfil);
-        setAvatarUrl(res.data.fotoPerfil);
+    window.addEventListener('perfilActualizado', cargarEstadoPerfil);
+    cargarEstadoPerfil();
+    return () => window.removeEventListener('perfilActualizado', cargarEstadoPerfil);
+  }, [navigate]);
+
+  // Temporizador inteligente de recordatorios de pausa activa
+  useEffect(() => {
+    const mins = perfilVerificacion.frecuenciaRecordatorioMin;
+    if (!mins || mins <= 0) return;
+
+    const timer = setInterval(() => {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🧘 ¡Hora de tu pausa activa en ActivaMente!', {
+          body: `Han pasado ${mins} minutos. Tómate unos minutos para estirar y despejar tu mente.`
+        });
       }
-    }).catch(() => {});
-    return () => window.removeEventListener('perfilActualizado', actualizarAvatar);
-  }, []);
+    }, mins * 60 * 1000);
+
+    return () => clearInterval(timer);
+  }, [perfilVerificacion.frecuenciaRecordatorioMin]);
 
   const cerrarSesion = () => {
     localStorage.removeItem('token');
@@ -63,10 +106,17 @@ export default function Layout() {
           <nav className="flex flex-col gap-6 w-full items-center">
             {menu.map((item) => {
               const activo = location.pathname.includes(item.path);
+              const mostrarAlertaAjustes =
+                item.path === '/app/ajustes' &&
+                perfilVerificacion.cargado &&
+                !perfilVerificacion.emailVerificado;
               return (
                 <Link key={item.path} to={item.path} title={item.title}
-                  className={`p-3 rounded-xl transition-all ${activo ? 'bg-[#2E2A3A] text-white shadow-inner' : 'hover:text-white hover:bg-[#2E2A3A]'}`}>
+                  className={`relative p-3 rounded-xl transition-all ${activo ? 'bg-[#2E2A3A] text-white shadow-inner' : 'hover:text-white hover:bg-[#2E2A3A]'}`}>
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">{item.icon}</svg>
+                  {mostrarAlertaAjustes && (
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-[#1E1B29]" title="Cuenta pendiente de verificación" />
+                  )}
                 </Link>
               );
             })}
@@ -98,6 +148,25 @@ export default function Layout() {
       {/* ÁREA DE CONTENIDO PRINCIPAL */}
       <main className="flex-1 ml-20 p-8 overflow-y-auto w-full">
         <div className="max-w-7xl mx-auto">
+          {perfilVerificacion.cargado &&
+            !perfilVerificacion.emailVerificado &&
+            !location.pathname.includes('/app/ajustes') && (
+              <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm text-amber-900 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <span>⚠️</span>
+                  <span>
+                    Tu correo (<strong>{perfilVerificacion.email}</strong>) aún no está confirmado. Tienes{' '}
+                    <strong>{perfilVerificacion.diasRestantes} días</strong> antes de que la cuenta se elimine automáticamente.
+                  </span>
+                </div>
+                <Link
+                  to="/app/ajustes"
+                  className="bg-amber-900 hover:bg-amber-950 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all whitespace-nowrap self-start sm:self-auto"
+                >
+                  Confirmar o reenviar en Ajustes →
+                </Link>
+              </div>
+            )}
           <Outlet />
         </div>
       </main>
