@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Pulido nativo para iOS / iPhone 15 (Dynamic Island, taps suaves y rebote controlado) */
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
 /* Soporte global para Modo Oscuro en ActivaMente */
 html.tema-oscuro body,
 html.tema-oscuro .bg-\[\#F8FAFC\] {
@@ -35,4 +42,9 @@ html.tema-oscuro select {
   background-color: #0F172A !important;
   color: #F8FAFC !important;
   border-color: #334155 !important;
+}
+
+/* Modo oscuro elegante para los mosaicos del mapa Leaflet */
+html.tema-oscuro .leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }

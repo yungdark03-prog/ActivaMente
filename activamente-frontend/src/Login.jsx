@@ -49,23 +49,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-6 font-sans">
-      <div className="max-w-4xl w-full bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-3 sm:p-6 font-sans">
+      <div className="max-w-4xl w-full bg-white rounded-3xl md:rounded-[2rem] shadow-xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
         
-        {/* PANEL DE MARCA (Izquierda) */}
-        <div className="md:w-1/2 bg-gradient-to-br from-[#1E1B29] to-[#0284C7] p-12 text-white flex flex-col justify-center relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="w-16 h-16 flex items-center justify-center mb-6">
+        {/* PANEL DE MARCA (Compacto en móvil, Izquierda en escritorio) */}
+        <div className="md:w-1/2 bg-gradient-to-br from-[#1E1B29] to-[#0284C7] px-6 py-5 md:p-12 text-white flex flex-col justify-center relative overflow-hidden">
+          <div className="relative z-10 flex items-center gap-3.5 md:block">
+            <div className="w-11 h-11 md:w-16 md:h-16 flex items-center justify-center md:mb-6 shrink-0">
               <img
                 src="/Logo login.svg"
                 alt="ActivaMente Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <h1 className="text-4xl font-extrabold mb-4 tracking-tight">Bienvenido de nuevo.</h1>
-            <p className="text-blue-100 text-lg leading-relaxed">
-              Tu espacio personal de bienestar. Inicia sesión para continuar con tus pausas activas y mejorar tu productividad.
-            </p>
+            <div>
+              <h1 className="text-xl md:text-4xl font-extrabold md:mb-4 tracking-tight">
+                Bienvenido de nuevo.
+              </h1>
+              <p className="text-blue-100 text-xs md:text-lg leading-relaxed">
+                Tu espacio personal de bienestar y pausas activas.
+              </p>
+            </div>
           </div>
           {/* Decoración de fondo abstracta */}
           <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl"></div>
@@ -73,13 +77,13 @@ export default function Login() {
         </div>
 
         {/* PANEL DE FORMULARIO (Derecha) */}
-        <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center bg-white">
+        <div className="md:w-1/2 p-6 sm:p-8 md:p-14 flex flex-col justify-center bg-white">
           {!modoRecuperacion ? (
             <>
-              <h2 className="text-2xl font-bold text-[#0F172A] mb-2">Iniciar Sesión</h2>
-              <p className="text-gray-500 text-sm mb-8">Ingresa tus credenciales para acceder a tu cuenta.</p>
+              <h2 className="text-xl md:text-2xl font-bold text-[#0F172A] mb-1 md:mb-2">Iniciar Sesión</h2>
+              <p className="text-gray-500 text-xs md:text-sm mb-6 md:mb-8">Ingresa tus credenciales para acceder a tu cuenta.</p>
               
-              <form onSubmit={handleLogin} className="flex flex-col gap-5">
+              <form onSubmit={handleLogin} className="flex flex-col gap-4 md:gap-5">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">Correo Electrónico</label>
                   <input 
@@ -88,7 +92,7 @@ export default function Login() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tu@correo.com"
                     required
-                    className="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] outline-none transition-all text-sm"
+                    className="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] outline-none transition-all text-base md:text-sm"
                   />
                 </div>
 
@@ -113,7 +117,7 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] outline-none transition-all text-sm"
+                    className="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] outline-none transition-all text-base md:text-sm"
                   />
                 </div>
 
@@ -137,6 +141,16 @@ export default function Login() {
                   Regístrate aquí
                 </Link>
               </p>
+
+              <div className="mt-4 text-center text-[11px] text-gray-400 flex items-center justify-center gap-3">
+                <Link to="/privacidad" className="hover:text-[#0284C7] hover:underline">
+                  Aviso de Privacidad
+                </Link>
+                <span>•</span>
+                <Link to="/terminos" className="hover:text-[#0284C7] hover:underline">
+                  Términos y Deslinde Médico
+                </Link>
+              </div>
             </>
           ) : (
             <div className="animate-fade-in">
@@ -159,7 +173,7 @@ export default function Login() {
                     onChange={(e) => setEmailRecuperacion(e.target.value)}
                     placeholder="tu.correo@gmail.com"
                     required
-                    className="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] outline-none transition-all text-sm"
+                    className="w-full border border-gray-200 rounded-xl p-3.5 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0284C7] outline-none transition-all text-base md:text-sm"
                   />
                 </div>
 

@@ -29,6 +29,7 @@ export default function Ajustes() {
   const [frecuenciaRecordatorioMin, setFrecuenciaRecordatorioMin] = useState('0');
   const [notificacionesEmail, setNotificacionesEmail] = useState(true);
   const [temaOscuro, setTemaOscuro] = useState(false);
+  const [chatbotHabilitado, setChatbotHabilitado] = useState(true);
 
   const [estadoGuardado, setEstadoGuardado] = useState({ tipo: '', texto: '' });
 
@@ -84,6 +85,10 @@ export default function Ajustes() {
         setSonidoTemporizador(data.sonidoTemporizador !== undefined ? Boolean(data.sonidoTemporizador) : true);
         setFrecuenciaRecordatorioMin(data.frecuenciaRecordatorioMin !== undefined ? String(data.frecuenciaRecordatorioMin) : '0');
         setNotificacionesEmail(data.notificacionesEmail !== undefined ? Boolean(data.notificacionesEmail) : true);
+        const botActivo = data.chatbotHabilitado !== undefined ? Boolean(data.chatbotHabilitado) : true;
+        setChatbotHabilitado(botActivo);
+        localStorage.setItem('chatbotHabilitado', String(botActivo));
+
         const esOscuro = Boolean(data.temaOscuro);
         setTemaOscuro(esOscuro);
         document.documentElement.classList.toggle('tema-oscuro', esOscuro);
@@ -217,7 +222,8 @@ export default function Ajustes() {
     sonidoTemporizador,
     frecuenciaRecordatorioMin: parseInt(frecuenciaRecordatorioMin, 10) || 0,
     notificacionesEmail,
-    temaOscuro
+    temaOscuro,
+    chatbotHabilitado
   });
 
   const confirmarCambioFoto = async () => {
@@ -730,6 +736,36 @@ export default function Ajustes() {
                   >
                     🔊 Probar sonido de campana
                   </button>
+                </div>
+
+                {/* INTERRUPTOR DEL ASISTENTE VIRTUAL MENTI */}
+                <div className="md:col-span-2 pt-2">
+                  <label className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <div className="pr-4">
+                      <span className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
+                        🤖 Mostrar Asistente Virtual Menti
+                        {chatbotHabilitado ? (
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Activo</span>
+                        ) : (
+                          <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">Oculto</span>
+                        )}
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Muestra u oculta la burbuja flotante del asistente inteligente en la esquina inferior derecha de la plataforma.
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={chatbotHabilitado}
+                      onChange={(e) => {
+                        const nuevoEstado = e.target.checked;
+                        setChatbotHabilitado(nuevoEstado);
+                        localStorage.setItem('chatbotHabilitado', String(nuevoEstado));
+                        window.dispatchEvent(new Event('perfilActualizado'));
+                      }}
+                      className="w-5 h-5 accent-[#0284C7] rounded cursor-pointer"
+                    />
+                  </label>
                 </div>
               </div>
             </div>

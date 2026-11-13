@@ -13,10 +13,14 @@ const {
 // POST /api/auth/registro
 const registrarUsuario = async (req, res) => {
   try {
-    const { nombre, email, password, ocupacion } = req.body;
+    const { nombre, email, password, ocupacion, aceptoTerminos } = req.body;
 
     if (!nombre || !email || !password) {
       return res.status(400).json({ error: 'Nombre, email y password son obligatorios' });
+    }
+
+    if (!aceptoTerminos) {
+      return res.status(400).json({ error: 'Debes aceptar el Aviso de Privacidad y los Términos de Uso.' });
     }
 
     // Limpiar cuentas expiradas (> 7 días sin verificar) antes de validar duplicados

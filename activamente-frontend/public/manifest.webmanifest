@@ -1,0 +1,19 @@
+{
+  "name": "ActivaMente — Pausas Activas y Bienestar",
+  "short_name": "ActivaMente",
+  "description": "Tu espacio personal de pausas activas, rutinas, zonas al aire libre y bienestar diario.",
+  "start_url": "/app/inicio",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E1B29",
+  "icons": [
+    {
+      "src": "/LOGOLOCO.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

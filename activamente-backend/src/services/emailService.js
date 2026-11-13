@@ -380,6 +380,9 @@ const limpiarCuentasNoVerificadasExpiradas = async () => {
 
       IF COL_LENGTH('dbo.Usuarios', 'ExpiracionRecuperacion') IS NULL
         ALTER TABLE dbo.Usuarios ADD ExpiracionRecuperacion DATETIME2 NULL;
+
+      IF COL_LENGTH('dbo.Usuarios', 'chatbotHabilitado') IS NULL
+        ALTER TABLE dbo.Usuarios ADD chatbotHabilitado BIT NOT NULL CONSTRAINT DF_Usuarios_Chatbot DEFAULT 1;
     `);
 
     const deleteRes = await pool.request().query(`

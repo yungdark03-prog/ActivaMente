@@ -29,6 +29,7 @@ const obtenerPerfil = async (req, res) => {
           COALESCE(frecuenciaRecordatorioMin, 0) AS frecuenciaRecordatorioMin,
           COALESCE(notificacionesEmail, 1) AS notificacionesEmail,
           COALESCE(temaOscuro, 0) AS temaOscuro,
+          COALESCE(chatbotHabilitado, 1) AS chatbotHabilitado,
           EmailVerificado AS emailVerificado,
           FechaRegistro AS fechaRegistro,
           DATEADD(DAY, 7, COALESCE(FechaRegistro, GETDATE())) AS fechaLimiteVerificacion,
@@ -67,6 +68,7 @@ const obtenerPerfil = async (req, res) => {
       frecuenciaRecordatorioMin: Number(perfil.frecuenciaRecordatorioMin || 0),
       notificacionesEmail: Boolean(perfil.notificacionesEmail),
       temaOscuro: Boolean(perfil.temaOscuro),
+      chatbotHabilitado: perfil.chatbotHabilitado !== undefined ? Boolean(perfil.chatbotHabilitado) : true,
       emailVerificado: Boolean(perfil.emailVerificado),
       horasRestantesVerificacion: perfil.emailVerificado ? null : horasRestantes,
       diasRestantesVerificacion: perfil.emailVerificado ? null : diasRestantes
@@ -91,7 +93,8 @@ const actualizarPerfil = async (req, res) => {
       sonidoTemporizador,
       frecuenciaRecordatorioMin,
       notificacionesEmail,
-      temaOscuro
+      temaOscuro,
+      chatbotHabilitado
     } = req.body;
 
     const nombreLimpio = typeof nombre === 'string' && nombre.trim() !== '' ? nombre.trim() : null;
@@ -105,6 +108,7 @@ const actualizarPerfil = async (req, res) => {
     const recordatorioLimpio = frecuenciaRecordatorioMin !== undefined && frecuenciaRecordatorioMin !== null ? (parseInt(frecuenciaRecordatorioMin, 10) || 0) : null;
     const notifEmailBit = notificacionesEmail !== undefined && notificacionesEmail !== null ? (notificacionesEmail ? 1 : 0) : null;
     const temaOscuroBit = temaOscuro !== undefined && temaOscuro !== null ? (temaOscuro ? 1 : 0) : null;
+    const chatbotBit = chatbotHabilitado !== undefined && chatbotHabilitado !== null ? (chatbotHabilitado ? 1 : 0) : null;
 
     const pool = await poolPromise;
 
@@ -121,6 +125,7 @@ const actualizarPerfil = async (req, res) => {
       .input('frecuenciaRecordatorioMin', sql.Int, recordatorioLimpio)
       .input('notificacionesEmail', sql.Bit, notifEmailBit)
       .input('temaOscuro', sql.Bit, temaOscuroBit)
+      .input('chatbotHabilitado', sql.Bit, chatbotBit)
       .query(`
         UPDATE dbo.Usuarios
         SET Nombre = COALESCE(@nombre, Nombre),
@@ -133,7 +138,8 @@ const actualizarPerfil = async (req, res) => {
             sonidoTemporizador = COALESCE(@sonidoTemporizador, sonidoTemporizador),
             frecuenciaRecordatorioMin = COALESCE(@frecuenciaRecordatorioMin, frecuenciaRecordatorioMin),
             notificacionesEmail = COALESCE(@notificacionesEmail, notificacionesEmail),
-            temaOscuro = COALESCE(@temaOscuro, temaOscuro)
+            temaOscuro = COALESCE(@temaOscuro, temaOscuro),
+            chatbotHabilitado = COALESCE(@chatbotHabilitado, chatbotHabilitado)
         WHERE Id = @id
       `);
 
