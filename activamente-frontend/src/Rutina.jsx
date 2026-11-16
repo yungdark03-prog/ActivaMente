@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from './api';
+import { obtenerGuiaEjercicio, IlustracionEjercicio } from './guiaEjercicios';
 
 export default function Rutina() {
   const [ubicacion, setUbicacion] = useState('oficina');
   const [tiempo, setTiempo] = useState('10');
   const [objetivo, setObjetivo] = useState('concentracion');
-  
+
   const [rutina, setRutina] = useState(null);
   const [error, setError] = useState('');
-  
+
   // Estados de Evaluación
   const [esfuerzo, setEsfuerzo] = useState(3);
   const [utilidad, setUtilidad] = useState(3);
@@ -82,6 +83,25 @@ export default function Rutina() {
     return () => clearInterval(intervalo);
   }, [timerActivo, tiempoRestante, rutina, sonidoHabilitado]);
 
+  // Avance automático de ejercicio según el tiempo transcurrido cuando el temporizador está activo
+  useEffect(() => {
+    if (!timerActivo || !rutina?.actividades?.length) return;
+    const total = Number(rutina.duracionEstimadaSegundos || 0);
+    if (total <= 0) return;
+
+    const transcurrido = total - tiempoRestante;
+    let acumulado = 0;
+    for (let i = 0; i < rutina.actividades.length; i++) {
+      acumulado += Number(rutina.actividades[i].duracionSegundos || 60);
+      if (transcurrido < acumulado) {
+        if (i !== actividadActualIndex) {
+          setActividadActualIndex(i);
+        }
+        break;
+      }
+    }
+  }, [tiempoRestante, timerActivo, rutina]);
+
   const formatoTiempo = (segundos) => {
     const min = Math.floor(segundos / 60).toString().padStart(2, '0');
     const seg = (segundos % 60).toString().padStart(2, '0');
@@ -140,13 +160,16 @@ export default function Rutina() {
     setTimerActivo(false);
   };
 
+  const actividadActual = rutina?.actividades?.[actividadActualIndex] || null;
+  const guiaActual = actividadActual ? obtenerGuiaEjercicio(actividadActual) : null;
+
   return (
     <div className="animate-fade-in text-gray-800 font-sans">
       {/* Encabezado */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Mi Espacio de Bienestar</h1>
-          <p className="text-gray-500 mt-1">Configura y ejecuta tus pausas activas diarias.</p>
+          <p className="text-gray-500 mt-1">Configura y ejecuta tus pausas activas diarias con guía visual paso a paso.</p>
         </div>
         <button onClick={reiniciarPausa} className="bg-[#0284C7] hover:bg-[#0369a1] text-white font-bold py-2.5 px-5 rounded-full flex items-center gap-2 shadow-sm transition-all cursor-pointer">
           <span>+</span> Nueva Pausa
@@ -211,34 +234,61 @@ export default function Rutina() {
           {error && <p className="text-red-500 text-sm mt-2 text-center">❌ {error}</p>}
         </section>
 
-        {/* PANEL CENTRAL: RUTINA DE HOY (Col 5-8) & REPRODUCTOR (Col 9-12) */}
+        {/* PANEL CENTRAL: RUTINA DE HOY Y GUÍA INTERACTIVA (Col 5-12) */}
         <section className="lg:col-span-8 flex flex-col gap-6">
           
           {rutina ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
               
-              {/* LISTA DE EJERCICIOS */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-4">
-                <div className="mb-2">
-                  <h2 className="text-xl font-bold text-[#0F172A]">Mi Rutina de Hoy</h2>
-                  <p className="text-xs text-gray-500">Haz clic en una actividad para ver detalles.</p>
+              {/* LISTA DE EJERCICIOS (Col 1-5) */}
+              <div className="md:col-span-5 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col gap-4">
+                <div className="mb-1">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-[#0F172A]">Mi Rutina de Hoy</h2>
+                    <span className="text-xs font-bold text-[#0284C7] bg-[#F0F9FF] px-2.5 py-1 rounded-full">
+                      {rutina.actividades.length} ejercicios
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Selecciona cualquier ejercicio para ver su ilustración y pasos.
+                  </p>
                 </div>
                 
                 {!rutinaFinalizada && !evaluada ? (
-                  <div className="flex flex-col gap-3 overflow-y-auto max-h-[420px] pr-2">
-                    {rutina.actividades.map((act, index) => (
-                      <div key={act.id} onClick={() => setActividadActualIndex(index)}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 ${actividadActualIndex === index ? 'border-[#0284C7] bg-[#F0F9FF]' : 'border-gray-100 bg-[#F8FAFC] hover:bg-gray-50'}`}>
-                        
-                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center font-bold text-blue-700">
-                          {act.orden}
+                  <div className="flex flex-col gap-3 overflow-y-auto max-h-[580px] pr-1">
+                    {rutina.actividades.map((act, index) => {
+                      const guiaItem = obtenerGuiaEjercicio(act);
+                      const seleccionado = actividadActualIndex === index;
+                      return (
+                        <div
+                          key={act.id || index}
+                          onClick={() => setActividadActualIndex(index)}
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
+                            seleccionado
+                              ? 'border-[#0284C7] bg-[#F0F9FF] shadow-sm'
+                              : 'border-gray-100 bg-[#F8FAFC] hover:bg-gray-50'
+                          }`}
+                        >
+                          <div
+                            className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center font-bold shrink-0 ${
+                              seleccionado ? 'bg-[#0284C7] text-white' : 'bg-blue-100 text-blue-700'
+                            }`}
+                          >
+                            <span className="text-base leading-none">{guiaItem.icono}</span>
+                            <span className="text-[10px] leading-none mt-0.5">#{act.orden}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-sm text-[#0F172A] leading-snug">{act.titulo}</h3>
+                            <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full border mt-1 ${guiaItem.colorBadge}`}>
+                              {guiaItem.categoria}
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1">
+                              ⏱️ {act.duracionSegundos ? `${act.duracionSegundos}s (${act.duracionTexto})` : act.duracionTexto} • {guiaItem.pasos.length} pasos
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-sm text-[#0F172A] truncate">{act.titulo}</h3>
-                          <p className="text-xs text-gray-500">⏱️ {act.duracionTexto} • Suave</p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-12 text-gray-400 font-medium">
@@ -247,39 +297,130 @@ export default function Rutina() {
                 )}
               </div>
 
-              {/* REPRODUCTOR EN VIVO & EVALUACIÓN */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between min-h-[460px]">
+              {/* REPRODUCTOR EN VIVO + ILUSTRACIÓN + INSTRUCCIONES PASO A PASO (Col 6-12) */}
+              <div className="md:col-span-7 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between min-h-[540px]">
                 
-                {!rutinaFinalizada && !evaluada && (
+                {!rutinaFinalizada && !evaluada && actividadActual && guiaActual && (
                   <>
-                    {/* Cabecera del reproductor */}
-                    <div>
-                      <span className="bg-[#E0F2FE] text-[#0369a1] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">REPRODUCTOR EN VIVO</span>
-                      <h2 className="text-2xl font-bold text-[#0F172A] mt-3 font-mono text-center my-6 tracking-tight">
-                        {formatoTiempo(tiempoRestante)}
-                      </h2>
+                    {/* Cabecera del reproductor y temporizador */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-[#E0F2FE] text-[#0369a1] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                          Ejercicio {actividadActual.orden} de {rutina.actividades.length}
+                        </span>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${guiaActual.colorBadge}`}>
+                          {guiaActual.icono} {guiaActual.categoria}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-[#F8FAFC] px-3.5 py-1.5 rounded-xl border border-gray-200">
+                        <span className="text-xs text-gray-500 font-semibold">Tiempo total:</span>
+                        <span className="text-xl font-extrabold text-[#0F172A] font-mono tracking-tight">
+                          {formatoTiempo(tiempoRestante)}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Miniatura y controles */}
-                    <div className="flex-1 flex flex-col justify-center items-center gap-4 bg-[#F8FAFC] p-4 rounded-2xl border border-gray-50/50">
-                      <div className="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-2xl shadow-inner">
-                        {rutina.actividades[actividadActualIndex]?.orden}
+                    {/* Título y descripción general */}
+                    <div className="mt-4 mb-3">
+                      <h3 className="text-lg font-extrabold text-[#0F172A]">
+                        {actividadActual.orden}. {actividadActual.titulo}
+                      </h3>
+                      {actividadActual.descripcion && (
+                        <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                          {actividadActual.descripcion}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Ilustración animada del ejercicio */}
+                    <IlustracionEjercicio
+                      idGuia={guiaActual.idGuia}
+                      multimedia={actividadActual.multimedia}
+                      titulo={actividadActual.titulo}
+                    />
+
+                    {/* Tarjetas rápidas de Postura y Respiración */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
+                      <div className="bg-[#F8FAFC] p-3 rounded-xl border border-gray-100">
+                        <p className="text-[11px] font-bold text-[#0284C7] uppercase tracking-wide">
+                          🪑 Postura inicial
+                        </p>
+                        <p className="text-xs text-gray-700 mt-0.5 font-medium">
+                          {guiaActual.postura}
+                        </p>
                       </div>
-                      <div className="text-center">
-                        <h4 className="font-bold text-[#0F172A] text-sm">{rutina.actividades[actividadActualIndex]?.titulo}</h4>
-                        <p className="text-xs text-gray-500 mt-1 px-4">{rutina.actividades[actividadActualIndex]?.descripcion || '¡Listo para el estiramiento!'}</p>
+                      <div className="bg-[#F8FAFC] p-3 rounded-xl border border-gray-100">
+                        <p className="text-[11px] font-bold text-teal-700 uppercase tracking-wide">
+                          🌬️ Respiración
+                        </p>
+                        <p className="text-xs text-gray-700 mt-0.5 font-medium">
+                          {guiaActual.respiracion}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Botones de acción */}
-                    <div className="grid grid-cols-2 gap-2 mt-6">
+                    {/* Lista de Instrucciones Paso a Paso */}
+                    <div className="mt-4 bg-[#F8FAFC] p-4 rounded-2xl border border-gray-100">
+                      <h4 className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <span>📋</span> Instrucciones paso a paso
+                      </h4>
+                      <ol className="flex flex-col gap-2.5">
+                        {guiaActual.pasos.map((paso, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5 text-xs text-gray-700 leading-relaxed">
+                            <span className="w-5 h-5 rounded-full bg-[#0284C7] text-white font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <span>{paso}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    {/* Consejo ergonómico */}
+                    <div className="mt-3 bg-amber-50/80 border border-amber-200/80 rounded-xl p-3 flex items-start gap-2">
+                      <span className="text-base leading-none mt-0.5">💡</span>
+                      <p className="text-xs text-amber-900 leading-snug">
+                        <strong className="font-bold">Consejo saludable: </strong>
+                        {guiaActual.consejo}
+                      </p>
+                    </div>
+
+                    {/* Navegación entre ejercicios (Anterior / Siguiente) */}
+                    <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-gray-100">
+                      <button
+                        type="button"
+                        onClick={() => setActividadActualIndex((prev) => Math.max(0, prev - 1))}
+                        disabled={actividadActualIndex === 0}
+                        className="py-2 px-3.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 cursor-pointer"
+                      >
+                        ← Ejercicio anterior
+                      </button>
+                      <span className="text-xs text-gray-400 font-semibold">
+                        {actividadActualIndex + 1} / {rutina.actividades.length}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActividadActualIndex((prev) =>
+                            Math.min(rutina.actividades.length - 1, prev + 1)
+                          )
+                        }
+                        disabled={actividadActualIndex === rutina.actividades.length - 1}
+                        className="py-2 px-3.5 rounded-xl border border-gray-200 text-xs font-bold text-[#0284C7] hover:bg-[#F0F9FF] disabled:opacity-40 cursor-pointer"
+                      >
+                        Siguiente ejercicio →
+                      </button>
+                    </div>
+
+                    {/* Botones de acción del temporizador */}
+                    <div className="grid grid-cols-2 gap-3 mt-4">
                       <button onClick={() => setTimerActivo(!timerActivo)}
-                        className={`py-2.5 px-4 rounded-xl text-xs font-bold text-white transition-all shadow-sm cursor-pointer ${timerActivo ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-[#0284C7] hover:bg-[#0369a1]'}`}>
-                        {timerActivo ? 'PAUSAR' : 'INICIAR'}
+                        className={`py-3 px-4 rounded-xl text-xs font-bold text-white transition-all shadow-sm cursor-pointer ${timerActivo ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-[#0284C7] hover:bg-[#0369a1]'}`}>
+                        {timerActivo ? '⏸ PAUSAR TEMPORIZADOR' : '▶ INICIAR PAUSA ACTIVA'}
                       </button>
                       <button onClick={terminarRutinaManualmente}
-                        className="py-2.5 px-4 rounded-xl text-xs font-bold bg-red-500 hover:bg-red-600 text-white transition-all shadow-sm cursor-pointer">
-                        TERMINAR
+                        className="py-3 px-4 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm cursor-pointer">
+                        ✓ COMPLETAR Y EVALUAR
                       </button>
                     </div>
                   </>
@@ -337,12 +478,27 @@ export default function Rutina() {
               </div>
             </div>
           ) : (
-            // VISTA VACÍA
-            <div className="bg-white p-12 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center items-center text-center gap-4 min-h-[460px]">
+            // VISTA VACÍA CON VISTA PREVIA DE LAS GUÍAS DISPONIBLES
+            <div className="bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-center items-center text-center gap-6 min-h-[460px]">
               <div className="text-5xl">🧘‍♂️</div>
               <div>
                 <h3 className="text-xl font-bold text-[#0F172A]">¡Todo listo para arrancar!</h3>
-                <p className="text-sm text-gray-500 max-w-sm mt-1 mx-auto">Selecciona tus preferencias en el panel de la izquierda y haz clic en "Generar Rutina" para iniciar tu pausa activa.</p>
+                <p className="text-sm text-gray-500 max-w-md mt-1 mx-auto">
+                  Selecciona tus preferencias en el panel de la izquierda y haz clic en <strong>"Generar Rutina"</strong>. Cada ejercicio incluirá su <strong>ilustración animada</strong> e <strong>instrucciones paso a paso</strong>.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-xl mt-2">
+                {[
+                  { icono: '🦒', nombre: 'Cuello y Cervicales' },
+                  { icono: '🙆‍♂️', nombre: 'Hombros y Espalda' },
+                  { icono: '👁️', nombre: 'Descanso Visual' },
+                  { icono: '🌬️', nombre: 'Respiración Guiada' }
+                ].map((item) => (
+                  <div key={item.nombre} className="bg-[#F8FAFC] border border-gray-100 rounded-2xl p-3 flex flex-col items-center gap-1">
+                    <span className="text-2xl">{item.icono}</span>
+                    <span className="text-xs font-semibold text-gray-600">{item.nombre}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

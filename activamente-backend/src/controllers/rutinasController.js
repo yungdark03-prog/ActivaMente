@@ -7,6 +7,32 @@ const columnaUbicacion = {
   area_trabajo: 'AptoAreaTrabajo'
 };
 
+const obtenerInstruccionesPorDefecto = (ej = {}) => {
+  const texto = `${ej.Titulo || ''} ${ej.Descripcion || ''} ${ej.Tipo || ''}`.toLowerCase();
+  if (texto.includes('cuello') || texto.includes('cervical') || texto.includes('cabeza')) {
+    return '1. Siéntate con la espalda recta y relaja los hombros.\n2. Inclina suavemente la cabeza llevando la oreja hacia el hombro derecho por 12 segundos.\n3. Regresa al centro inhalando y repite hacia el lado izquierdo.\n4. Evita movimientos bruscos o forzar el cuello.';
+  }
+  if (texto.includes('hombro') || texto.includes('trapecio') || texto.includes('escapul')) {
+    return '1. Relaja los brazos a los costados del cuerpo.\n2. Inhala subiendo ambos hombros hacia las orejas.\n3. Exhala llevándolos hacia atrás y hacia abajo en círculos amplios.\n4. Realiza 8 repeticiones hacia atrás y 8 hacia adelante.';
+  }
+  if (texto.includes('ojo') || texto.includes('visual') || texto.includes('20-20-20') || texto.includes('vista') || texto.includes('parpade')) {
+    return '1. Aparta la vista del monitor y enfoca un punto a 6 metros de distancia durante 20 segundos.\n2. Parpadea suavemente 10 veces para hidratar los ojos.\n3. Mira hacia arriba, abajo, izquierda y derecha sin mover la cabeza.\n4. Cierra los ojos 10 segundos respirando profundo.';
+  }
+  if (texto.includes('muñeca') || texto.includes('muneca') || texto.includes('mano') || texto.includes('dedo') || texto.includes('carpiano')) {
+    return '1. Extiende un brazo al frente con la palma hacia arriba.\n2. Con la otra mano, lleva suavemente los dedos hacia abajo durante 15 segundos.\n3. Cambia de brazo y repite con la palma hacia abajo.\n4. Finaliza haciendo 10 círculos suaves con ambas muñecas.';
+  }
+  if (texto.includes('respir') || texto.includes('inhal') || texto.includes('diafragm') || texto.includes('oxigen')) {
+    return '1. Apoya la espalda en el respaldo y coloca una mano sobre el abdomen.\n2. Inhala lento por la nariz durante 4 segundos inflando el abdomen.\n3. Mantén el aire 4 segundos con los hombros relajados.\n4. Exhala suavemente por la boca durante 6 segundos y repite el ciclo.';
+  }
+  if (texto.includes('pierna') || texto.includes('tobillo') || texto.includes('rodilla') || texto.includes('caminata') || texto.includes('circulac')) {
+    return '1. Despega ligeramente un pie del suelo y realiza 8 giros de tobillo hacia cada lado.\n2. Alterna elevando talones y puntas de los pies 10 veces.\n3. Extiende una pierna al frente manteniendo 10 segundos y cambia de lado.\n4. Si estás de pie, marcha suavemente en tu lugar durante 30 segundos.';
+  }
+  if (texto.includes('mente') || texto.includes('concentra') || texto.includes('enfoque') || texto.includes('mindful')) {
+    return '1. Cierra los ojos o baja la mirada y realiza 3 respiraciones profundas.\n2. Relaja la frente, la mandíbula y deja caer los hombros.\n3. Enfoca tu atención únicamente en la entrada y salida del aire por 30 segundos.\n4. Abre los ojos lentamente definiendo tu siguiente objetivo del día.';
+  }
+  return '1. Adopta una postura erguida con los pies bien apoyados en el suelo.\n2. Entrelaza las manos y estira los brazos suavemente alargando la espalda.\n3. Mantén el estiramiento de 12 a 15 segundos acompañando con respiración profunda.\n4. Regresa despacio a la posición inicial y repite el movimiento sin forzar.';
+};
+
 const generarRutina = async (req, res) => {
   try {
     const { ubicacion, tiempo, objetivo } = req.body;
@@ -110,8 +136,11 @@ const generarRutina = async (req, res) => {
         tipo: ej.Tipo,
         duracionSegundos: Number(ej.DuracionSegundos),
         duracionTexto: `${Math.ceil(Number(ej.DuracionSegundos) / 60)} min`,
-        descripcion: ej.Descripcion,
-        instrucciones: ej.Instrucciones,
+        descripcion: ej.Descripcion || 'Realiza el movimiento con suavidad y acompáñalo de respiración consciente.',
+        instrucciones:
+          ej.Instrucciones && String(ej.Instrucciones).trim().length >= 25
+            ? ej.Instrucciones
+            : obtenerInstruccionesPorDefecto(ej),
         multimedia: ej.UrlMultimedia
       }))
     });
