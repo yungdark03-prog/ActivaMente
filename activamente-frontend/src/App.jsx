@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import BannerCookies from './BannerCookies';
 import InstalarApp from './InstalarApp';
 import { useTemaOscuro } from './tema';
@@ -78,6 +79,7 @@ function App() {
       </Suspense>
       <InstalarApp />
       <BannerCookies />
+      <Analytics />
     </BrowserRouter>
   );
 }
