@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from './api';
+import { obtenerTemaGuardado } from './tema';
 
 export default function Registro() {
   const navigate = useNavigate();
@@ -38,8 +39,10 @@ export default function Registro() {
     try {
       const response = await api.post('/auth/registro', {
         ...formData,
-        aceptoTerminos
+        aceptoTerminos,
+        temaOscuro: obtenerTemaGuardado()
       });
+      localStorage.removeItem('temaElegidoAntesDeLogin');
       localStorage.setItem('token', response.data.token);
       if (response.data.verificacion) {
         sessionStorage.setItem(

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from './api';
+import { obtenerTemaGuardado, aplicarTemaDOM, cambiarTemaGlobal } from './tema';
 
 export default function Ajustes() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function Ajustes() {
   const [sonidoTemporizador, setSonidoTemporizador] = useState(true);
   const [frecuenciaRecordatorioMin, setFrecuenciaRecordatorioMin] = useState('0');
   const [notificacionesEmail, setNotificacionesEmail] = useState(true);
-  const [temaOscuro, setTemaOscuro] = useState(false);
+  const [temaOscuro, setTemaOscuro] = useState(() => obtenerTemaGuardado());
   const [chatbotHabilitado, setChatbotHabilitado] = useState(true);
 
   const [estadoGuardado, setEstadoGuardado] = useState({ tipo: '', texto: '' });
@@ -91,8 +92,7 @@ export default function Ajustes() {
 
         const esOscuro = Boolean(data.temaOscuro);
         setTemaOscuro(esOscuro);
-        document.documentElement.classList.toggle('tema-oscuro', esOscuro);
-        localStorage.setItem('temaOscuro', String(esOscuro));
+        aplicarTemaDOM(esOscuro);
         localStorage.setItem('fotoPerfil', foto);
         window.dispatchEvent(new Event('perfilActualizado'));
       } catch (error) {
@@ -105,6 +105,16 @@ export default function Ajustes() {
       }
     };
     cargarPerfil();
+
+    const handleTemaExterno = (e) => {
+      if (typeof e.detail === 'boolean') {
+        setTemaOscuro(e.detail);
+      } else {
+        setTemaOscuro(obtenerTemaGuardado());
+      }
+    };
+    window.addEventListener('temaCambiado', handleTemaExterno);
+    return () => window.removeEventListener('temaCambiado', handleTemaExterno);
   }, [navigate]);
 
   const probarSonidoCampana = () => {
@@ -129,10 +139,9 @@ export default function Ajustes() {
     }
   };
 
-  const handleToggleTemaOscuro = (nuevoValor) => {
+  const handleToggleTemaOscuro = async (nuevoValor) => {
     setTemaOscuro(nuevoValor);
-    document.documentElement.classList.toggle('tema-oscuro', nuevoValor);
-    localStorage.setItem('temaOscuro', String(nuevoValor));
+    await cambiarTemaGlobal(nuevoValor);
   };
 
   const handleSeleccionarRecordatorio = async (valorMinutos) => {

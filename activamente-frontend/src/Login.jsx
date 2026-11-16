@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from './api';
+import { aplicarTemaDOM, obtenerTemaGuardado } from './tema';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -20,6 +21,17 @@ export default function Login() {
     try {
       const response = await api.post('/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
+
+      const elegidoAntes = localStorage.getItem('temaElegidoAntesDeLogin');
+      if (elegidoAntes !== null) {
+        const preferido = obtenerTemaGuardado();
+        localStorage.removeItem('temaElegidoAntesDeLogin');
+        aplicarTemaDOM(preferido);
+        api.put('/usuarios/perfil', { temaOscuro: preferido }).catch(() => {});
+      } else if (response.data?.usuario?.temaOscuro !== undefined) {
+        aplicarTemaDOM(Boolean(response.data.usuario.temaOscuro));
+      }
+
       navigate('/app/inicio');
     } catch (error) {
       setMensaje(error.response?.data?.error || 'Error al iniciar sesión');

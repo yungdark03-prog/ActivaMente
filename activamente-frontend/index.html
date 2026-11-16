@@ -18,6 +18,13 @@
     <meta name="apple-mobile-web-app-title" content="ActivaMente" />
 
     <title>ActivaMente — Pausas Activas y Bienestar</title>
+    <script>
+      try {
+        if (localStorage.getItem('temaOscuro') === 'true') {
+          document.documentElement.classList.add('tema-oscuro');
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

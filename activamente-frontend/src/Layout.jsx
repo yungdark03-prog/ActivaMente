@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import api from './api';
 import Chatbot from './Chatbot';
+import { useTemaOscuro, aplicarTemaDOM } from './tema';
 
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { temaOscuro, alternarTema } = useTemaOscuro();
   const [avatarUrl, setAvatarUrl] = useState(
     localStorage.getItem('fotoPerfil') || 'https://api.dicebear.com/7.x/notionists/svg?seed=Ramses'
   );
@@ -21,9 +23,6 @@ export default function Layout() {
   );
 
   useEffect(() => {
-    const temaGuardado = localStorage.getItem('temaOscuro') === 'true';
-    document.documentElement.classList.toggle('tema-oscuro', temaGuardado);
-
     const cargarEstadoPerfil = () => {
       setAvatarUrl(localStorage.getItem('fotoPerfil') || 'https://api.dicebear.com/7.x/notionists/svg?seed=Ramses');
       api.get('/usuarios/perfil').then((res) => {
@@ -31,9 +30,9 @@ export default function Layout() {
           localStorage.setItem('fotoPerfil', res.data.fotoPerfil);
           setAvatarUrl(res.data.fotoPerfil);
         }
-        const esOscuro = Boolean(res.data?.temaOscuro);
-        localStorage.setItem('temaOscuro', String(esOscuro));
-        document.documentElement.classList.toggle('tema-oscuro', esOscuro);
+        if (res.data?.temaOscuro !== undefined) {
+          aplicarTemaDOM(Boolean(res.data.temaOscuro));
+        }
 
         const botActivo = res.data?.chatbotHabilitado !== undefined
           ? Boolean(res.data.chatbotHabilitado)
@@ -117,7 +116,16 @@ export default function Layout() {
           <span className="font-extrabold text-base tracking-tight">ActivaMente</span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={alternarTema}
+            className="w-8 h-8 rounded-xl bg-[#2E2A3A] hover:bg-[#3B364A] flex items-center justify-center text-sm transition-colors cursor-pointer"
+            title={temaOscuro ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+            aria-label={temaOscuro ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+          >
+            {temaOscuro ? '🌙' : '☀️'}
+          </button>
           <Link to="/app/ajustes" className="w-8 h-8 rounded-full border border-white/20 overflow-hidden" title="Mi Perfil">
             <img src={avatarUrl} alt="Perfil" className="w-full h-full object-cover bg-gray-100" />
           </Link>
@@ -166,8 +174,18 @@ export default function Layout() {
           </nav>
         </div>
 
-        {/* PARTE INFERIOR: Botón de Salir y Foto de Perfil */}
-        <div className="flex flex-col gap-6 items-center w-full">
+        {/* PARTE INFERIOR: Modo Oscuro/Claro, Botón de Salir y Foto de Perfil */}
+        <div className="flex flex-col gap-5 items-center w-full">
+          <button
+            type="button"
+            onClick={alternarTema}
+            className="p-3 text-gray-300 hover:text-white bg-[#2E2A3A]/70 hover:bg-[#2E2A3A] rounded-xl transition-all cursor-pointer text-lg leading-none"
+            title={temaOscuro ? 'Modo Oscuro activo (clic para Modo Claro)' : 'Modo Claro activo (clic para Modo Oscuro)'}
+            aria-label={temaOscuro ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+          >
+            {temaOscuro ? '🌙' : '☀️'}
+          </button>
+
           <button
             onClick={cerrarSesion}
             className="p-3 text-gray-400 hover:text-red-400 hover:bg-[#2E2A3A] rounded-xl transition-all cursor-pointer"

@@ -226,7 +226,7 @@ export function IlustracionEjercicio({ idGuia, multimedia, titulo }) {
 
   if (multimedia && !errorImagen && (multimedia.startsWith('http') || multimedia.startsWith('/'))) {
     return (
-      <div className="relative w-full h-48 bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] rounded-2xl flex items-center justify-center overflow-hidden border border-blue-100">
+      <div className="ilustracion-ejercicio-box relative w-full h-48 bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] rounded-2xl flex items-center justify-center overflow-hidden border border-blue-100">
         <img
           src={multimedia}
           alt={titulo || 'Demostración del ejercicio'}
@@ -238,7 +238,7 @@ export function IlustracionEjercicio({ idGuia, multimedia, titulo }) {
   }
 
   return (
-    <div className="relative w-full h-52 bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] rounded-2xl flex flex-col items-center justify-center overflow-hidden border border-blue-100 p-3 select-none">
+    <div className="ilustracion-ejercicio-box relative w-full h-52 bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE] rounded-2xl flex flex-col items-center justify-center overflow-hidden border border-blue-100 p-3 select-none">
       {/* Estilos de animación locales para las demostraciones corporales */}
       <style>{`
         @keyframes tiltNeck {

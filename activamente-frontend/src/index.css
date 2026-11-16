@@ -9,44 +9,187 @@ body {
   overscroll-behavior-y: contain;
 }
 
-/* Soporte global para Modo Oscuro en ActivaMente */
+/* ==========================================================================
+   MODO OSCURO GLOBAL PARA TODA LA WEB (html.tema-oscuro)
+   ========================================================================== */
+html.tema-oscuro {
+  color-scheme: dark;
+}
+
 html.tema-oscuro body,
-html.tema-oscuro .bg-\[\#F8FAFC\] {
+html.tema-oscuro .bg-\[\#F8FAFC\],
+html.tema-oscuro .bg-\[\#F8FAFC\]\/50 {
   background-color: #0F172A !important;
   color: #F1F5F9 !important;
 }
 
-html.tema-oscuro .bg-white {
+html.tema-oscuro .bg-white,
+html.tema-oscuro .bg-white\/95,
+html.tema-oscuro .bg-white\/90 {
   background-color: #1E293B !important;
   color: #F1F5F9 !important;
 }
 
-html.tema-oscuro .bg-\[\#F0F9FF\] {
-  background-color: #0C4A6E !important;
-  color: #F8FAFC !important;
+html.tema-oscuro .bg-gray-50,
+html.tema-oscuro .bg-gray-50\/50 {
+  background-color: #0F172A !important;
+  color: #E2E8F0 !important;
 }
 
+html.tema-oscuro .bg-gray-100,
+html.tema-oscuro .bg-gray-200 {
+  background-color: #334155 !important;
+  color: #F1F5F9 !important;
+}
+
+html.tema-oscuro .bg-\[\#F0F9FF\],
+html.tema-oscuro .bg-\[\#E0F2FE\],
+html.tema-oscuro .bg-blue-50,
+html.tema-oscuro .bg-blue-100 {
+  background-color: #0C4A6E !important;
+  color: #E0F2FE !important;
+}
+
+html.tema-oscuro .text-\[\#0369a1\],
+html.tema-oscuro .text-\[\#0369A1\],
+html.tema-oscuro .text-blue-700,
+html.tema-oscuro .text-blue-900 {
+  color: #7DD3FC !important;
+}
+
+/* Textos generales */
 html.tema-oscuro .text-\[\#0F172A\],
+html.tema-oscuro .text-gray-900,
 html.tema-oscuro .text-gray-800,
 html.tema-oscuro .text-gray-700 {
   color: #F8FAFC !important;
 }
 
 html.tema-oscuro .text-gray-600,
-html.tema-oscuro .text-gray-500 {
+html.tema-oscuro .text-gray-500,
+html.tema-oscuro .text-gray-400 {
   color: #94A3B8 !important;
 }
 
+/* Bordes y líneas divisoras */
+html.tema-oscuro .border-gray-50\/50,
 html.tema-oscuro .border-gray-100,
-html.tema-oscuro .border-gray-200 {
+html.tema-oscuro .border-gray-200,
+html.tema-oscuro .border-blue-50,
+html.tema-oscuro .border-blue-100,
+html.tema-oscuro .border-blue-200,
+html.tema-oscuro .border-blue-200\/80,
+html.tema-oscuro hr {
   border-color: #334155 !important;
 }
 
-html.tema-oscuro input:not([type="checkbox"]),
-html.tema-oscuro select {
+/* Inputs, selects y textareas */
+html.tema-oscuro input:not([type="checkbox"]):not([type="range"]),
+html.tema-oscuro select,
+html.tema-oscuro textarea {
   background-color: #0F172A !important;
   color: #F8FAFC !important;
   border-color: #334155 !important;
+}
+
+html.tema-oscuro input:not([type="checkbox"]):not([type="range"])::placeholder,
+html.tema-oscuro textarea::placeholder {
+  color: #64748B !important;
+}
+
+html.tema-oscuro input:not([type="checkbox"]):not([type="range"]):focus,
+html.tema-oscuro select:focus,
+html.tema-oscuro textarea:focus {
+  background-color: #0F172A !important;
+  border-color: #0284C7 !important;
+}
+
+/* Botones oscuros (#0F172A) resaltados en modo oscuro */
+html.tema-oscuro button.bg-\[\#0F172A\] {
+  background-color: #334155 !important;
+  border: 1px solid #475569 !important;
+  color: #F8FAFC !important;
+}
+
+html.tema-oscuro button.bg-\[\#0F172A\]:hover {
+  background-color: #475569 !important;
+}
+
+/* Recuadro de ilustración animada de ejercicios */
+html.tema-oscuro .ilustracion-ejercicio-box {
+  background: linear-gradient(to bottom, #0F172A, #1E293B) !important;
+  border-color: #334155 !important;
+}
+
+html.tema-oscuro .ilustracion-ejercicio-box svg text[fill="#0369A1"] {
+  fill: #7DD3FC !important;
+}
+
+/* Alertas, badges y paneles informativos en modo oscuro */
+html.tema-oscuro .bg-amber-50,
+html.tema-oscuro .bg-amber-50\/80 {
+  background-color: rgba(120, 53, 15, 0.28) !important;
+  border-color: rgba(217, 119, 6, 0.45) !important;
+  color: #FDE68A !important;
+}
+
+html.tema-oscuro .bg-amber-100,
+html.tema-oscuro .bg-amber-200\/80 {
+  background-color: rgba(180, 83, 9, 0.35) !important;
+  color: #FEF3C7 !important;
+}
+
+html.tema-oscuro .text-amber-900,
+html.tema-oscuro .text-amber-800,
+html.tema-oscuro .text-amber-700,
+html.tema-oscuro .text-amber-600 {
+  color: #FCD34D !important;
+}
+
+html.tema-oscuro .bg-emerald-50,
+html.tema-oscuro .bg-green-50,
+html.tema-oscuro .bg-green-50\/50 {
+  background-color: rgba(6, 78, 59, 0.3) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #A7F3D0 !important;
+}
+
+html.tema-oscuro .bg-emerald-100,
+html.tema-oscuro .bg-green-100 {
+  background-color: rgba(5, 150, 105, 0.32) !important;
+  color: #D1FAE5 !important;
+}
+
+html.tema-oscuro .text-emerald-900,
+html.tema-oscuro .text-emerald-800,
+html.tema-oscuro .text-emerald-700,
+html.tema-oscuro .text-green-700 {
+  color: #6EE7B7 !important;
+}
+
+html.tema-oscuro .bg-red-50,
+html.tema-oscuro .bg-red-50\/60 {
+  background-color: rgba(127, 29, 29, 0.28) !important;
+  border-color: rgba(239, 68, 68, 0.45) !important;
+  color: #FECACA !important;
+}
+
+html.tema-oscuro .text-red-900,
+html.tema-oscuro .text-red-700,
+html.tema-oscuro .text-red-600 {
+  color: #FCA5A5 !important;
+}
+
+html.tema-oscuro .bg-purple-50 {
+  background-color: rgba(88, 28, 135, 0.3) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #E9D5FF !important;
+}
+
+html.tema-oscuro .bg-orange-50 {
+  background-color: rgba(124, 45, 18, 0.3) !important;
+  border-color: rgba(249, 115, 22, 0.4) !important;
+  color: #FED7AA !important;
 }
 
 /* Modo oscuro elegante para los mosaicos del mapa Leaflet */

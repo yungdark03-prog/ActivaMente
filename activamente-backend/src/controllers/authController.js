@@ -13,7 +13,7 @@ const {
 // POST /api/auth/registro
 const registrarUsuario = async (req, res) => {
   try {
-    const { nombre, email, password, ocupacion, aceptoTerminos } = req.body;
+    const { nombre, email, password, ocupacion, aceptoTerminos, temaOscuro } = req.body;
 
     if (!nombre || !email || !password) {
       return res.status(400).json({ error: 'Nombre, email y password son obligatorios' });
@@ -53,6 +53,7 @@ const registrarUsuario = async (req, res) => {
     insertReq.input('passwordHash', sql.NVarChar, passwordHash);
     insertReq.input('ocupacion', sql.NVarChar, ocupacion || 'estudiante');
     insertReq.input('tokenVerificacion', sql.NVarChar, tokenVerificacion);
+    insertReq.input('temaOscuro', sql.Bit, temaOscuro ? 1 : 0);
 
     const result = await insertReq.query(`
       INSERT INTO dbo.Usuarios (
@@ -64,7 +65,8 @@ const registrarUsuario = async (req, res) => {
         FechaRegistro,
         EmailVerificado,
         TokenVerificacion,
-        FechaEnvioVerificacion
+        FechaEnvioVerificacion,
+        temaOscuro
       )
       OUTPUT
         INSERTED.Id,
@@ -73,7 +75,8 @@ const registrarUsuario = async (req, res) => {
         INSERTED.Rol,
         INSERTED.Ocupacion,
         INSERTED.EmailVerificado,
-        INSERTED.FechaRegistro
+        INSERTED.FechaRegistro,
+        INSERTED.temaOscuro
       VALUES (
         @nombre,
         @email,
@@ -83,7 +86,8 @@ const registrarUsuario = async (req, res) => {
         GETDATE(),
         0,
         @tokenVerificacion,
-        GETDATE()
+        GETDATE(),
+        @temaOscuro
       )
     `);
 
@@ -117,7 +121,8 @@ const registrarUsuario = async (req, res) => {
         email: newUser.Email,
         rol: newUser.Rol,
         ocupacion: newUser.Ocupacion,
-        emailVerificado: Boolean(newUser.EmailVerificado)
+        emailVerificado: Boolean(newUser.EmailVerificado),
+        temaOscuro: Boolean(newUser.temaOscuro)
       }
     });
   } catch (error) {
@@ -152,6 +157,7 @@ const loginUsuario = async (req, res) => {
           Activo,
           EmailVerificado,
           FechaRegistro,
+          COALESCE(temaOscuro, 0) AS temaOscuro,
           DATEDIFF(HOUR, COALESCE(FechaRegistro, GETDATE()), GETDATE()) AS horasDesdeRegistro
         FROM dbo.Usuarios
         WHERE Email = @email
@@ -207,7 +213,8 @@ const loginUsuario = async (req, res) => {
         email: usuario.Email,
         rol: usuario.Rol,
         ocupacion: usuario.Ocupacion,
-        emailVerificado: Boolean(usuario.EmailVerificado)
+        emailVerificado: Boolean(usuario.EmailVerificado),
+        temaOscuro: Boolean(usuario.temaOscuro)
       }
     });
   } catch (error) {
